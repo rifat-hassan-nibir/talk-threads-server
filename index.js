@@ -16,7 +16,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Talk threads server running");
+  res.send("Talk threads server running fine");
 });
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
