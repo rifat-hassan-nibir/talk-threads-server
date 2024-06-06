@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -31,9 +31,17 @@ async function run() {
   try {
     const postsCollection = client.db("talkThreads").collection("posts");
 
-    // get posts from db
+    // get all posts from db
     app.get("/posts", async (req, res) => {
       const result = await postsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get single post data from db
+    app.get("/post/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postsCollection.findOne(query);
       res.send(result);
     });
 
