@@ -55,8 +55,11 @@ async function run() {
     // get all posts for a user using email
     app.get("/my-posts/:email", async (req, res) => {
       const email = req.params.email;
+      const sortText = req.query.dateSort;
+      const sortOrder = sortText === "ascending" ? 1 : -1;
+
       const query = { "authorInfo.email": email };
-      const result = await postsCollection.find(query).toArray();
+      const result = await postsCollection.find(query).sort({ date: sortOrder }).toArray();
       res.send(result);
     });
 
