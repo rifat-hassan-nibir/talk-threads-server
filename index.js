@@ -45,9 +45,18 @@ async function run() {
       res.send(result);
     });
 
+    // add post to db
     app.post("/add-post", async (req, res) => {
       const post = req.body;
       const result = await postsCollection.insertOne(post);
+      res.send(result);
+    });
+
+    // get all posts for a user using email
+    app.get("/my-posts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { "authorInfo.email": email };
+      const result = await postsCollection.find(query).toArray();
       res.send(result);
     });
 
