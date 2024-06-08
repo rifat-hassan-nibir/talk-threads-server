@@ -30,6 +30,23 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const postsCollection = client.db("talkThreads").collection("posts");
+    const usersCollection = client.db("talkThreads").collection("users");
+
+    // save user's data in db
+    app.put("/user", async (req, res) => {
+      const userInfo = req.body;
+      const query = { email: userInfo?.email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...userInfo,
+          timeStamp: Date.now(),
+        },
+      };
+
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
 
     // get all posts from db
     app.get("/posts", async (req, res) => {
