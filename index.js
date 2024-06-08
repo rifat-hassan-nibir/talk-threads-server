@@ -31,6 +31,7 @@ async function run() {
   try {
     const postsCollection = client.db("talkThreads").collection("posts");
     const usersCollection = client.db("talkThreads").collection("users");
+    const tagsCollection = client.db("talkThreads").collection("tags");
 
     // save user's data in db
     app.put("/user", async (req, res) => {
@@ -99,6 +100,12 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // get all tags from db
+    app.get("/tags", async (req, res) => {
+      const result = await tagsCollection.find().toArray();
       res.send(result);
     });
 
