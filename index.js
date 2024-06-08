@@ -36,6 +36,12 @@ async function run() {
     app.put("/user", async (req, res) => {
       const userInfo = req.body;
       const query = { email: userInfo?.email };
+
+      // Check if user already exists or not
+      const isExists = await usersCollection.findOne(query);
+      if (isExists) return res.send(isExists);
+
+      // if user is new
       const options = { upsert: true };
       const updateDoc = {
         $set: {
@@ -51,6 +57,14 @@ async function run() {
     // get all posts from db
     app.get("/posts", async (req, res) => {
       const result = await postsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get user role using email
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     });
 
