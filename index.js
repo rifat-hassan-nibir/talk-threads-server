@@ -57,7 +57,7 @@ async function run() {
 
     // get all posts from db
     app.get("/posts", async (req, res) => {
-      const result = await postsCollection.find().toArray();
+      const result = await postsCollection.find().sort({ date: -1 }).toArray();
       res.send(result);
     });
 
