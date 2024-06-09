@@ -123,6 +123,13 @@ async function run() {
       res.send(result);
     });
 
+    // post tag to db
+    app.post("/tags", async (req, res) => {
+      const tag = req.body;
+      const result = await tagsCollection.insertOne(tag);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
