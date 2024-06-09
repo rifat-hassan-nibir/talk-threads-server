@@ -105,9 +105,15 @@ async function run() {
     });
 
     // post annoucement to db
-    app.post("/announcement", async (req, res) => {
+    app.post("/announcements", async (req, res) => {
       const annoucement = req.body;
       const result = await annoucementsCollection.insertOne(annoucement);
+      res.send(result);
+    });
+
+    // get announcements data from db
+    app.get("/announcements", async (req, res) => {
+      const result = await annoucementsCollection.find().toArray();
       res.send(result);
     });
 
