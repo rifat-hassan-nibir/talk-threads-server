@@ -63,7 +63,9 @@ async function run() {
 
     // get all posts from db
     app.get("/posts", async (req, res) => {
-      const result = await postsCollection.find().sort({ date: -1 }).toArray();
+      const search = req.query.search;
+      let query = { tag: { $regex: search, $options: "i" } };
+      const result = await postsCollection.find(query).sort({ date: -1 }).toArray();
       res.send(result);
     });
 
