@@ -32,6 +32,7 @@ async function run() {
     const postsCollection = client.db("talkThreads").collection("posts");
     const usersCollection = client.db("talkThreads").collection("users");
     const tagsCollection = client.db("talkThreads").collection("tags");
+    const annoucementsCollection = client.db("talkThreads").collection("announcements");
 
     // save user's data in db
     app.put("/user", async (req, res) => {
@@ -100,6 +101,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // post annoucement to db
+    app.post("/announcement", async (req, res) => {
+      const annoucement = req.body;
+      const result = await annoucementsCollection.insertOne(annoucement);
       res.send(result);
     });
 
