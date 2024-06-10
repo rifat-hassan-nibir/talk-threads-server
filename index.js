@@ -59,9 +59,10 @@ async function run() {
     // get users data from db
     app.get("/users", async (req, res) => {
       const searchText = req.query.search;
-      const page = parseInt(req.params.page) - 1;
-      const size = parseInt(req.params.size);
-      let query = { userName: { $regex: searchText, $options: "i" } };
+      const page = parseInt(req.query.page) - 1;
+      const size = parseInt(req.query.size);
+      let query = {};
+      if (searchText) query = { userName: { $regex: searchText, $options: "i" } };
       const result = await usersCollection
         .find(query)
         .skip(page * size)
@@ -72,8 +73,18 @@ async function run() {
 
     // get users count from db
     app.get("/users-count", async (req, res) => {
-      const count = await usersCollection.countDocuments();
+      const searchText = req.query.search;
+      const query = { userName: { $regex: searchText, $options: "i" } };
+      const count = await usersCollection.countDocuments(query);
       res.send({ count });
+    });
+
+    // get user role using email
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
     });
 
     // get all posts from db
@@ -97,14 +108,6 @@ async function run() {
       let query = { tag: { $regex: search, $options: "i" } };
       const count = await postsCollection.countDocuments(query);
       res.send({ count });
-    });
-
-    // get user role using email
-    app.get("/user/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { email: email };
-      const result = await usersCollection.findOne(query);
-      res.send(result);
     });
 
     // get single post data from db
