@@ -56,6 +56,7 @@ async function run() {
       res.send(result);
     });
 
+    // get users data from db
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
@@ -64,9 +65,22 @@ async function run() {
     // get all posts from db
     app.get("/posts", async (req, res) => {
       const search = req.query.search;
+      const page = parseInt(req.query.page) - 1;
+      const size = parseInt(req.query.size);
       let query = { tag: { $regex: search, $options: "i" } };
-      const result = await postsCollection.find(query).sort({ date: -1 }).toArray();
+      const result = await postsCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .sort({ date: -1 })
+        .toArray();
       res.send(result);
+    });
+
+    // pagination: get all posts count
+    app.get("/posts-count", async (req, res) => {
+      const count = await postsCollection.countDocuments();
+      res.send({ count });
     });
 
     // get user role using email
