@@ -62,6 +62,12 @@ async function run() {
       res.send(result);
     });
 
+    // get users count from db
+    app.get("/users-count", async (req, res) => {
+      const count = await usersCollection.countDocuments();
+      res.send({ count });
+    });
+
     // get all posts from db
     app.get("/posts", async (req, res) => {
       const search = req.query.search;
