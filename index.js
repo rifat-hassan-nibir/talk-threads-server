@@ -58,7 +58,15 @@ async function run() {
 
     // get users data from db
     app.get("/users", async (req, res) => {
-      const result = await usersCollection.find().toArray();
+      const searchText = req.query.search;
+      const page = parseInt(req.params.page) - 1;
+      const size = parseInt(req.params.size);
+      let query = { userName: { $regex: searchText, $options: "i" } };
+      const result = await usersCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
 
@@ -85,7 +93,9 @@ async function run() {
 
     // pagination: get all posts count
     app.get("/posts-count", async (req, res) => {
-      const count = await postsCollection.countDocuments();
+      const search = req.query.search;
+      let query = { tag: { $regex: search, $options: "i" } };
+      const count = await postsCollection.countDocuments(query);
       res.send({ count });
     });
 
