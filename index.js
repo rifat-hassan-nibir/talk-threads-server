@@ -126,6 +126,14 @@ async function run() {
       res.send({ count });
     });
 
+    // get all posts for a user using email
+    app.get("/posts-count/:email", async (req, res) => {
+      const email = req.params.email;
+      let query = { "authorInfo.email": email };
+      const count = await postsCollection.countDocuments(query);
+      res.send({ count });
+    });
+
     // get single post data from db
     app.get("/post/:id", async (req, res) => {
       const id = req.params.id;
