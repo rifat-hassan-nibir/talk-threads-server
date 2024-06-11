@@ -56,6 +56,22 @@ async function run() {
       res.send(result);
     });
 
+    // update user role using email
+    app.patch("/update-role/:email", async (req, res) => {
+      const email = req.params.email;
+      const role = req.body;
+      const query = { email: email };
+      const updateDoc = {
+        $set: {
+          ...role,
+          timeStamp: Date.now(),
+        },
+      };
+      const options = { upsert: true };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
     // get users data from db
     app.get("/users", async (req, res) => {
       const searchText = req.query.search;
