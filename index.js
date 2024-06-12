@@ -33,6 +33,7 @@ async function run() {
     const usersCollection = client.db("talkThreads").collection("users");
     const tagsCollection = client.db("talkThreads").collection("tags");
     const annoucementsCollection = client.db("talkThreads").collection("announcements");
+    const commentsCollection = client.db("talkThreads").collection("comments");
 
     // save user's data in db
     app.put("/user", async (req, res) => {
@@ -165,6 +166,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // comment on post
+    app.post("/post-comment", async (req, res) => {
+      const comment = req.body;
+      const result = await commentsCollection.insertOne(comment);
       res.send(result);
     });
 
