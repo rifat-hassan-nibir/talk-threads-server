@@ -176,6 +176,14 @@ async function run() {
       res.send(result);
     });
 
+    // get comments a post using id
+    app.get("/comments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { post_id: id };
+      const result = await commentsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // post annoucement to db
     app.post("/announcements", async (req, res) => {
       const annoucement = req.body;
