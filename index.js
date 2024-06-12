@@ -176,11 +176,20 @@ async function run() {
       res.send(result);
     });
 
-    // get comments a post using id
+    // get comments of a post using id
     app.get("/comments/:id", async (req, res) => {
       const id = req.params.id;
       const query = { post_id: id };
       const result = await commentsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get comments count
+    app.get("/comments-count/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { post_id: id };
+      const count = await commentsCollection.countDocuments(query);
+      const result = { count: count };
       res.send(result);
     });
 
@@ -193,7 +202,7 @@ async function run() {
 
     // get announcements data from db
     app.get("/announcements", async (req, res) => {
-      const result = await annoucementsCollection.find().toArray();
+      const result = await annoucementsCollection.find().sort({ date: -1 }).toArray();
       res.send(result);
     });
 
