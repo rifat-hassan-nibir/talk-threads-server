@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -34,6 +35,22 @@ async function run() {
     const tagsCollection = client.db("talkThreads").collection("tags");
     const annoucementsCollection = client.db("talkThreads").collection("announcements");
     const commentsCollection = client.db("talkThreads").collection("comments");
+
+    // create-payment-intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const price = req.body.price;
+      const priceInCent = parseFloat(price) * 100;
+      if (!price && priceInCent < 1) return;
+      const { client_secret } = await stripe.paymentIntents.create({
+        amount: priceInCent,
+        currency: "usd",
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: { enabled: true },
+      });
+
+      // send client secret as response
+      res.send({ clientSecret: client_secret });
+    });
 
     // save user's data in db
     app.put("/user", async (req, res) => {
