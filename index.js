@@ -35,6 +35,7 @@ async function run() {
     const tagsCollection = client.db("talkThreads").collection("tags");
     const annoucementsCollection = client.db("talkThreads").collection("announcements");
     const commentsCollection = client.db("talkThreads").collection("comments");
+    const premiumUsersCollection = client.db("talkThreads").collection("premiumUsers");
 
     // create-payment-intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -113,12 +114,29 @@ async function run() {
       res.send({ count });
     });
 
-    // get user role using email
+    // get user information using email
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await usersCollection.findOne(query);
       res.send(result);
+    });
+
+    // premium users collection
+    app.post("/premium-users", async (req, res) => {
+      const userData = req.body;
+      // save new premium user's data in db
+      const result = await premiumUsersCollection.insertOne(userData);
+
+      // update a users premium user status using email
+      const userEmail = req.body.email;
+      const query = { email: userEmail };
+      const updateDoc = {
+        $set: { premiumUser: true },
+      };
+      const updatedUserStatus = await usersCollection.updateOne(query, updateDoc);
+
+      res.send({ result, updatedUserStatus });
     });
 
     // get all posts from db
