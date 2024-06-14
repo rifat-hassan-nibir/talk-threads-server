@@ -122,7 +122,7 @@ async function run() {
       res.send(result);
     });
 
-    // premium users collection
+    // add user to premium users collection and update usersCollection user premiumUser status
     app.post("/premium-users", async (req, res) => {
       const userData = req.body;
       // save new premium user's data in db
@@ -252,6 +252,14 @@ async function run() {
       const tag = req.body;
       const result = await tagsCollection.insertOne(tag);
       res.send(result);
+    });
+
+    // admin dashboard stats
+    app.get("/admin-stats", async (req, res) => {
+      const usersCount = await usersCollection.countDocuments();
+      const postsCount = await postsCollection.countDocuments();
+      const commentsCount = await commentsCollection.countDocuments();
+      res.send({ usersCount, postsCount, commentsCount });
     });
 
     await client.db("admin").command({ ping: 1 });
