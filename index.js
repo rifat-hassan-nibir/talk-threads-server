@@ -143,15 +143,43 @@ async function run() {
     // get all posts from db
     app.get("/posts", async (req, res) => {
       const search = req.query.search;
+      const popular = req.query.popular;
       const page = parseInt(req.query.page) - 1;
       const size = parseInt(req.query.size);
       let query = { tag: { $regex: search, $options: "i" } };
-      const result = await postsCollection
-        .find(query)
-        .skip(page * size)
-        .limit(size)
-        .sort({ date: -1 })
-        .toArray();
+
+      let result;
+      // sort by vote difference
+      if (popular === "true") {
+        result = await postsCollection
+          .aggregate([
+            {
+              $match: query,
+            },
+            {
+              $addFields: {
+                voteDifference: { $subtract: ["$upvote", "$downvote"] },
+              },
+            },
+            {
+              $sort: { voteDifference: -1 },
+            },
+            {
+              $skip: page * size,
+            },
+            {
+              $limit: size,
+            },
+          ])
+          .toArray();
+      } else {
+        result = await postsCollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .sort({ date: -1 })
+          .toArray();
+      }
       res.send(result);
     });
 
