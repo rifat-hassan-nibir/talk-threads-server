@@ -179,6 +179,23 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/update-vote/:id", async (req, res) => {
+      const postId = req.params.id;
+      const vote = req.query.vote;
+      const query = { _id: new ObjectId(postId) };
+
+      let updateDoc;
+
+      if (vote === "upvote") {
+        updateDoc = { $inc: { upvote: 1 } };
+      } else {
+        updateDoc = { $inc: { downvote: 1 } };
+      }
+
+      const result = await postsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     // add post to db
     app.post("/add-post", async (req, res) => {
       const post = req.body;
