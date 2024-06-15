@@ -36,6 +36,7 @@ async function run() {
     const annoucementsCollection = client.db("talkThreads").collection("announcements");
     const commentsCollection = client.db("talkThreads").collection("comments");
     const premiumUsersCollection = client.db("talkThreads").collection("premiumUsers");
+    const reportsCollection = client.db("talkThreads").collection("reports");
 
     // create-payment-intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -225,6 +226,27 @@ async function run() {
       const query = { post_id: id };
       const count = await commentsCollection.countDocuments(query);
       const result = { count: count };
+      res.send(result);
+    });
+
+    // post comment reports in db
+    app.post("/post-comment-reports", async (req, res) => {
+      const reportData = req.body;
+      const result = await reportsCollection.insertOne(reportData);
+      res.send(result);
+    });
+
+    // get comment reports
+    app.get("/get-reported-comments", async (req, res) => {
+      const result = await reportsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // delete reported comment
+    app.delete("/remove-reported-comment/:id", async (req, res) => {
+      const reportId = req.params.id;
+      const query = { _id: new ObjectId(reportId) };
+      const result = await reportsCollection.deleteOne(query);
       res.send(result);
     });
 
