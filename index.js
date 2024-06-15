@@ -242,11 +242,19 @@ async function run() {
       res.send(result);
     });
 
-    // delete reported comment
+    // remove reported comment
     app.delete("/remove-reported-comment/:id", async (req, res) => {
       const reportId = req.params.id;
       const query = { _id: new ObjectId(reportId) };
       const result = await reportsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // remove reported comment
+    app.delete("/delete-reported-comment/:id", async (req, res) => {
+      const commentId = req.params.id;
+      const query = { _id: new ObjectId(commentId) };
+      const result = await commentsCollection.deleteOne(query);
       res.send(result);
     });
 
