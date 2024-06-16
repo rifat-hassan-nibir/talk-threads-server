@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const cookieParser = require("cookie-parser");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
@@ -17,6 +18,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.okheupy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -28,6 +30,22 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+// middleware for veriying token
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+  if (!token) return res.status(401).send({ message: "unauthorized access" });
+  if (token) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        console.log(err);
+        res.status(401).send({ message: "unauthorized access" });
+      }
+      req.user = decoded;
+      next();
+    });
+  }
+};
 
 async function run() {
   try {
@@ -144,8 +162,12 @@ async function run() {
     });
 
     // get user information using email
-    app.get("/user/:email", async (req, res) => {
+    app.get("/user/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      const userEmail = req.user.email;
+      if (userEmail !== email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const query = { email: email };
       const result = await usersCollection.findOne(query);
       res.send(result);
@@ -220,8 +242,12 @@ async function run() {
     });
 
     // get all posts for a user using email
-    app.get("/posts-count/:email", async (req, res) => {
+    app.get("/posts-count/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      const userEmail = req.user.email;
+      if (userEmail !== email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       let query = { "authorInfo.email": email };
       const count = await postsCollection.countDocuments(query);
       res.send({ count });
@@ -260,11 +286,14 @@ async function run() {
     });
 
     // get all posts for a user using email
-    app.get("/my-posts/:email", async (req, res) => {
+    app.get("/my-posts/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      const userEmail = req.user.email;
+      if (userEmail !== email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const sortText = req.query.dateSort;
       const sortOrder = sortText === "ascending" ? 1 : -1;
-
       const query = { "authorInfo.email": email };
       const result = await postsCollection.find(query).sort({ date: sortOrder }).toArray();
       res.send(result);
